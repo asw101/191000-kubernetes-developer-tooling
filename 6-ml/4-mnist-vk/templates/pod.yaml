@@ -1,0 +1,28 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-tf-mnist
+spec:
+  containers:
+  - name: {{ .Release.Name }}-tf-mnist
+    image: microsoft/samples-tf-mnist-demo:gpu
+    resources:
+      requests:
+        cpu: 6
+        memory: 56G
+        nvidia.com/gpu: 1
+      limits:
+        cpu: 6
+        memory: 56G
+        nvidia.com/gpu: 1
+  nodeSelector:
+    beta.kubernetes.io/os: linux
+    kubernetes.io/role: agent
+    type: virtual-kubelet
+  tolerations:
+  - key: node.kubernetes.io/network-unavailable
+    operator: Exists
+  - key: virtual-kubelet.io/provider
+    operator: Equal
+    value: azure
+    effect: NoSchedule

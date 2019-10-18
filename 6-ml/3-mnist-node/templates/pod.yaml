@@ -1,0 +1,20 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-tf-mnist
+spec:
+  containers:
+  - name: {{ .Release.Name }}-tf-mnist
+    image: microsoft/samples-tf-mnist-demo:gpu
+    resources:
+      requests:
+        cpu: 5
+      limits:
+        cpu: 5
+  nodeSelector:
+    beta.kubernetes.io/instance-type: Standard_NC6_Promo
+  tolerations:
+  - key: "sku"
+    operator: "Equal"
+    value: "gpu"
+    effect: "NoSchedule"

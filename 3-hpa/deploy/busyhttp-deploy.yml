@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "2"
+  labels:
+    app: busyhttp
+  name: busyhttp
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: busyhttp
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: busyhttp
+    spec:
+      containers:
+      - image: jpetazzo/busyhttp
+        imagePullPolicy: Always
+        name: busyhttp
+        resources:
+          requests:
+            cpu: "1"
+            memory: 1G
+          limits:
+            cpu: "1"
+            memory: 1G
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30

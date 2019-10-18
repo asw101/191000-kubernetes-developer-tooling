@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-rabbitmq-consumer
+  namespace: default
+  labels:
+    app: {{ .Release.Name }}-rabbitmq-consumer
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-rabbitmq-consumer
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-rabbitmq-consumer
+    spec:
+      containers:
+      - name: {{ .Release.Name }}-rabbitmq-consumer
+        image: {{ .Values.image.repository }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+          - receive
+        args:
+          - 'amqp://user:{{ .Values.rabbitmq.password }}@rabbitmq.default.svc.cluster.local:5672'
+---
+apiVersion: keda.k8s.io/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ .Release.Name }}-rabbitmq-consumer
+  namespace: default
+  labels:
+    deploymentName: {{ .Release.Name }}-rabbitmq-consumer
+spec:
+  scaleTargetRef:
+    deploymentName: {{ .Release.Name }}-rabbitmq-consumer
+  pollingInterval: 5   # Optional. Default: 30 seconds
+  cooldownPeriod: 15   # Optional. Default: 300 seconds
+  maxReplicaCount: 30  # Optional. Default: 100
+  triggers:
+  - type: rabbitmq
+    metadata:
+      queueName: hello
+      host: 'amqp://user:{{ .Values.rabbitmq.password }}@rabbitmq.default.svc.cluster.local:5672'
+      queueLength  : '5'
+---
